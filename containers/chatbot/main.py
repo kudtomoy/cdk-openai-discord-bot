@@ -8,9 +8,11 @@ import openai
 import discord
 
 
+# Logger の設定
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Parameter Store から Secrets を取得
 ssm_client = boto3.client("ssm")
 ssm_response = ssm_client.get_parameters(
     Names=["/openai-discord-bot/discord-token", "/openai-discord-bot/openai-secret"],
@@ -44,6 +46,7 @@ def fetch_completion(messages: list) -> str:
 
 
 def get_role(author) -> str:
+    # Bot の発言なのか User の発言なのか判別する
     bot_name, bot_discriminator = BOT_AUTHOR.split("#")
     if author.name == bot_name and author.discriminator == bot_discriminator:
         return "assistant"
@@ -52,6 +55,7 @@ def get_role(author) -> str:
 
 
 def clean_message(message: str) -> str:
+    # Mention などの不要な文字を削除する
     return re.sub(r"<@\d+>", "", message).strip()
 
 
@@ -64,6 +68,7 @@ async def on_message(message):
         return
 
     if message.reference:
+        # リプライツリーがある場合、さかのぼってログを取得する
         referenced_message = await message.channel.fetch_message(
             message.reference.message_id
         )
@@ -100,6 +105,7 @@ async def on_message(message):
         await message.channel.send(response, reference=message)
 
     else:
+        # リプライツリーがない場合
         response = fetch_completion([{"role": "user", "content": message.content}])
         await message.channel.send(response, reference=message)
 

@@ -23,6 +23,7 @@ export class OpenaiDiscordBotStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     })
 
+    // ECS Task から Parameter Store にアクセスできるようにする
     taskRole.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -51,7 +52,7 @@ export class OpenaiDiscordBotStack extends cdk.Stack {
       }),
       environment: {
         CHARACTER_SETTING: readFileSync('./lib/character_setting.txt', 'utf8'),
-        BOT_AUTHOR: 'sample-bot#1584',
+        BOT_AUTHOR: 'sample-bot#1584',  // 環境に合わせて変更してください
       },
     })
 

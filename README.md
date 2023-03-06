@@ -1,8 +1,8 @@
-# Welcome to your CDK TypeScript project
+# cdk-openai-discord-bot
 
-This is a blank project for CDK development with TypeScript.
+![アーキテクチャ](architecture.png)
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+使用方法については [Blog](https://prototyping-blog.com/blog/openai-discord-bot) をお読みください。
 
 ## Useful commands
 
