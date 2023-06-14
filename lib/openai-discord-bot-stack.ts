@@ -11,9 +11,25 @@ export class OpenaiDiscordBotStack extends cdk.Stack {
 
     const { accountId, region } = new cdk.ScopedAws(this)
 
+    // Frugal VPC
     const vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs: 1,
+      natGateways: 1,
+      natGatewayProvider: ec2.NatProvider.instance({
+        instanceType: ec2.InstanceType.of(
+          ec2.InstanceClass.T3,
+          ec2.InstanceSize.NANO
+        ),
+      }),
     })
+
+    // NAT Instance に Session Manager を使えるようにする
+    const natInstance = vpc.node
+      .findChild('PublicSubnet1')
+      .node.findChild('NatInstance') as ec2.Instance
+    natInstance.role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')
+    )
 
     const cluster = new ecs.Cluster(this, 'Cluster', {
       vpc,
