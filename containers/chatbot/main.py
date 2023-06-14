@@ -2,6 +2,7 @@ import os
 import logging
 import json
 import re
+import time
 
 import boto3
 import openai
@@ -29,20 +30,24 @@ intents.typing = False
 discord_client = discord.Client(intents=intents)
 
 
-def fetch_completion(messages: list) -> str:
+def fetch_completion(messages: list, retries: int = 2) -> str:
     messages.insert(0, {"role": "system", "content": CHARACTER_SETTING})
 
-    try:
-        res = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
-    except openai.error.OpenAIError as e:
-        logger.error(e)
-        return str(e)
+    for i in range(retries + 1):
+        try:
+            res = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+            res_context = res["choices"][0]["message"]["content"]
 
-    res_context = res["choices"][0]["message"]["content"]
+            logger.info("OpenAI response: " + json.dumps(res, ensure_ascii=False))
 
-    logger.info("OpenAI response: " + json.dumps(res, ensure_ascii=False))
-
-    return res_context
+            return res_context
+        except openai.error.OpenAIError as e:
+            logger.warning(e)
+            if i < retries:
+                time.sleep(2**i)  # exponential backoff
+                continue
+            else:
+                return str(e)
 
 
 def get_role(author) -> str:
