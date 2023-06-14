@@ -52,7 +52,6 @@ export class OpenaiDiscordBotStack extends cdk.Stack {
       }),
       environment: {
         CHARACTER_SETTING: readFileSync('./lib/character_setting.txt', 'utf8'),
-        BOT_AUTHOR: 'sample-bot#1584',  // 環境に合わせて変更してください
       },
     })
 

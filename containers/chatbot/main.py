@@ -23,7 +23,6 @@ ssm_response = ssm_client.get_parameters(
 DISCORD_TOKEN = ssm_response["Parameters"][0]["Value"]
 openai.api_key = ssm_response["Parameters"][1]["Value"]
 CHARACTER_SETTING = os.environ["CHARACTER_SETTING"].strip()
-BOT_AUTHOR = os.environ["BOT_AUTHOR"]
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -51,9 +50,7 @@ def fetch_completion(messages: list, retries: int = 2) -> str:
 
 
 def get_role(author) -> str:
-    # Bot の発言なのか User の発言なのか判別する
-    bot_name, bot_discriminator = BOT_AUTHOR.split("#")
-    if author.name == bot_name and author.discriminator == bot_discriminator:
+    if author == discord_client.user:
         return "assistant"
     else:
         return "user"
